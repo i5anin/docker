@@ -1,0 +1,17 @@
+services:
+  windows_gui:
+    image: mcr.microsoft.com/windows:ltsc2022
+    container_name: windows_gui
+    restart: unless-stopped
+    isolation: process  # Запускаем в режиме Windows-контейнера с поддержкой GUI
+    ports:
+      - "3389:3389"  # Открываем RDP для подключения
+    stdin_open: true
+    tty: true
+    command: >
+      powershell -Command "& {
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 0;
+        Enable-NetFirewallRule -DisplayGroup 'Remote Desktop';
+        Start-Sleep -Seconds 10;
+        Get-NetIPAddress | Select-Object IPAddress
+      }"
