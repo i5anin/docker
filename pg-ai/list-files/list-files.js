@@ -2,11 +2,13 @@ import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
 
-// Получаем путь к текущему файлу и его директории
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Функция для рекурсивного обхода директорий
+// Список текстовых форматов, которые нужно обрабатывать
+const textFileExtensions = /\.(txt|md|js|ts|json|html|css|env|yml|yaml)$/i;
+
+// Функция чтения директории
 const readDirectory = (dir) => {
   fs.readdir(dir, (err, files) => {
     if (err) {
@@ -24,18 +26,13 @@ const readDirectory = (dir) => {
         }
 
         if (stats.isDirectory()) {
-          // Если это директория, рекурсивно обрабатываем её
           readDirectory(filePath);
         } else {
-          const icon = "📜"; // Всегда иконка 📜
-
-          // Проверяем, является ли файл текстовым
-          const isTextFile = /\.(txt|md|js|ts|json|html|css)$/i.test(file);
+          const isTextFile = textFileExtensions.test(file) || file.startsWith(".env");
 
           if (isTextFile) {
-            console.log(`${icon} ${file}`);
+            console.log(`📜 ${file}`);
 
-            // Читаем содержимое текстового файла (до 5000 символов)
             try {
               const content = fs.readFileSync(filePath, "utf8");
               console.log("🔍 Содержимое:");
@@ -45,8 +42,7 @@ const readDirectory = (dir) => {
               console.error(`❌ Ошибка чтения файла ${file}:`, error.message);
             }
           } else {
-            // Если файл не текстовый, пропускаем его
-            console.log(`📁 Пропускаем бинарный файл: ${file}`);
+            console.log(`📁 Бинарный файл (не читаем): ${file}`);
           }
         }
       });
@@ -62,12 +58,8 @@ const readDirectoriesFromFile = (filePath) => {
       return;
     }
 
-    const directories = data
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean); // Разделяем по строкам и убираем пустые строки
+    const directories = data.split("\n").map((line) => line.trim()).filter(Boolean);
 
-    // Обрабатываем все указанные директории и файлы
     directories.forEach((dirOrFile) => {
       fs.stat(dirOrFile, (err, stats) => {
         if (err) {
@@ -79,27 +71,20 @@ const readDirectoriesFromFile = (filePath) => {
           console.log(`📂 Обрабатываем директорию: ${dirOrFile}`);
           readDirectory(dirOrFile);
         } else if (stats.isFile()) {
-          const icon = "📜"; // Всегда иконка 📜
-          console.log(`${icon} ${dirOrFile}`);
-
-          // Проверяем, является ли файл текстовым
-          const isTextFile = /\.(txt|md|js|ts|json|html|css)$/i.test(dirOrFile);
+          const isTextFile = textFileExtensions.test(dirOrFile) || dirOrFile.startsWith(".env");
+          console.log(`📜 ${dirOrFile}`);
 
           if (isTextFile) {
-            // Читаем содержимое текстового файла (до 5000 символов)
             try {
               const content = fs.readFileSync(dirOrFile, "utf8");
               console.log("🔍 Содержимое:");
               console.log(content.substring(0, 5000)); // Ограничиваем вывод 5000 символами
               console.log("—".repeat(50));
             } catch (error) {
-              console.error(
-                `❌ Ошибка чтения файла ${dirOrFile}:`,
-                error.message
-              );
+              console.error(`❌ Ошибка чтения файла ${dirOrFile}:`, error.message);
             }
           } else {
-            console.log(`📁 Пропускаем бинарный файл: ${dirOrFile}`);
+            console.log(`📁 Бинарный файл (не читаем): ${dirOrFile}`);
           }
         }
       });
@@ -107,8 +92,6 @@ const readDirectoriesFromFile = (filePath) => {
   });
 };
 
-// Указываем путь к файлу с директориями и файлами
+// Читаем список директорий из файла dirs.txt
 const directoriesFile = "dirs.txt";
-
-// Читаем пути из файла
 readDirectoriesFromFile(directoriesFile);
