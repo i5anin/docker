@@ -1,14 +1,10 @@
-version: '3.8'
-
 services:
   postgres:
     image: ankane/pgvector:latest
     container_name: postgres
     restart: always
-    environment:
-      POSTGRES_DB: app_db
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: app_pass
+    env_file:
+      - .env  # Подключаем переменные
     ports:
       - "5432:5432"
     volumes:

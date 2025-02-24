@@ -1,0 +1,3 @@
+A:\development\docker\pg-ai\docker-compose.yml
+A:\development\docker\pg-ai\.env
+A:\development\docker\pg-ai\README.md
