@@ -1,0 +1,17 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566" # Основной API порт
+      - "4510-4559:4510-4559" # Динамические порты сервисов
+    environment:
+      - SERVICES=s3 # Включение сервиса S3
+      - DEBUG=1 # Включить логирование
+      - DATA_DIR=/tmp/localstack/data # Хранение данных между запусками
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    volumes:
+      - "./localstack:/tmp/localstack" # Монтирование локальной папки
+      - "/var/run/docker.sock:/var/run/docker.sock" # Доступ к Docker
+
