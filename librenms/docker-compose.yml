@@ -1,0 +1,42 @@
+services:
+  ### БАЗА ДАННЫХ (MariaDB)
+  mariadb:
+    image: mariadb:10.5
+    container_name: librenms-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - librenms-net
+
+  ### ОСНОВНОЙ СЕРВЕР LibreNMS
+  librenms:
+    image: librenms/librenms:latest
+    container_name: librenms
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      TZ: ${TZ}
+    ports:
+      - "8000:8000"
+    volumes:
+      - librenms_data:/data
+    networks:
+      - librenms-net
+
+networks:
+  librenms-net:
+
+volumes:
+  mariadb_data:
+  librenms_data:
